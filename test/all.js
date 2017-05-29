@@ -34,11 +34,22 @@ describe('chromejs tests', async () => {
       await chromeJs.goto(`http://localhost:${serverPort}/find_elements.html`)
     });
     it('should screenshot', async () => {
+      let filePath = './test/tmp/screenshot.png'
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath)
+      }
       let pngbuf = await chromeJs.screenshot()
       let newbase64 = pngbuf.toString('base64')
       var bitmap = fs.readFileSync(__dirname + '/fixtures/screenshot.png');
-      let base64 = new Buffer(bitmap).toString('base64');
-      assert.equal(base64, newbase64.replace('data:image/png;base64,', ''))
+      let testbase64 = new Buffer(bitmap).toString('base64');
+      assert.equal(testbase64, newbase64.replace('data:image/png;base64,', ''))
+
+      assert(!fs.existsSync(filePath))
+      await chromeJs.screenshot(filePath)
+      assert(fs.existsSync(filePath))
+      bitmap = fs.readFileSync(__dirname + '/tmp/screenshot.png');
+      let filebase64 = new Buffer(bitmap).toString('base64');
+      assert.equal(filebase64, testbase64)
     });
   });
   describe('element', function () {

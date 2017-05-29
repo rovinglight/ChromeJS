@@ -1,5 +1,6 @@
 const ChromeLauncher = require('lighthouse/lighthouse-cli/chrome-launcher').ChromeLauncher
 const CDP = require('chrome-remote-interface')
+const fs = require('fs')
 
 class ChromeJS {
   constructor(options = {}) {
@@ -215,12 +216,16 @@ class ChromeJS {
       resolve(evalResponse)
     })
   }
-  async screenshot (format = 'png', quality = undefined, fromSurface = true) {
+  async screenshot (filepath, format = 'png', quality = undefined, fromSurface = true) {
     if (['png', 'jpeg'].indexOf(format) === -1) {
       throw new Error('format is invalid.')
     }
     const {data} = await this.client.Page.captureScreenshot({format: format, quality: quality, fromSurface: fromSurface})
-    return Buffer.from(data, 'base64')
+    let imgBuf = Buffer.from(data, 'base64')
+    if (filepath) {
+      fs.writeFileSync(filepath, imgBuf)
+    }
+    return imgBuf
   }
 }
 
