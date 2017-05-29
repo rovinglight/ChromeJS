@@ -2,7 +2,7 @@ import {ChromeLauncher} from 'lighthouse/lighthouse-cli/chrome-launcher'
 import CDP from 'chrome-remote-interface'
 
 class ChromeJS {
-  constructor (options = {}) {
+  constructor(options = {}) {
     const defaults = {
       port: 9222,
       headless: true
@@ -23,7 +23,7 @@ class ChromeJS {
     // this.userAgentBeforeEmulate = null
   }
 
-  _createChromeLauncher (options) {
+  _createChromeLauncher(options) {
     const flags = []
     flags.push('--disable-gpu')
     if (options.headless) {
@@ -37,19 +37,15 @@ class ChromeJS {
         flags.push(f)
       })
     }
-    return new ChromeLauncher({
-      port: options.port,
-      autoSelectChrome: true,
-      additionalFlags: flags
-    })
+    return new ChromeLauncher({port: options.port, autoSelectChrome: true, additionalFlags: flags})
   }
 
-  async _waitFinish (timeout, callback) {
+  async _waitFinish(timeout, callback) {
     const start = Date.now()
     let finished = false
     let error = null
     let result = null
-    const f = async () => {
+    const f = async() => {
       try {
         result = await callback.apply()
         finished = true
@@ -73,7 +69,7 @@ class ChromeJS {
     return result
   }
 
-  async start () {
+  async start() {
     if (this.client !== null) {
       return
     }
@@ -88,7 +84,7 @@ class ChromeJS {
           return targets.filter(t => t.type === 'page').shift()
         }
       })
-      CDP(actualCdpOptions, async (client) => {
+      CDP(actualCdpOptions, async(client) => {
         this.client = client
         const {Network, Page, Runtime, Console} = client
         await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable()])
@@ -105,7 +101,7 @@ class ChromeJS {
     })
   }
 
-  async close () {
+  async close() {
     if (this.client === null) {
       return false
     }
@@ -118,20 +114,20 @@ class ChromeJS {
     return true
   }
 
-  async checkStart () {
+  async checkStart() {
     if (this.client === null) {
       await this.start()
     }
   }
 
-  async goto (url, options) {
+  async goto(url, options) {
     const defaultOptions = {
       waitLoadEvent: true
     }
     options = Object.assign(defaultOptions, options)
     await this.checkStart()
     try {
-      await this._waitFinish(this.options.gotoTimeout, async () => {
+      await this._waitFinish(this.options.gotoTimeout, async() => {
         await this.client.Page.navigate({url: url})
         if (options.waitLoadEvent) {
           await this.client.Page.loadEventFired()
@@ -142,7 +138,7 @@ class ChromeJS {
     }
   }
 
-  async sleep (ms) {
+  async sleep(ms) {
     return new Promise(resolve => {
       setTimeout(() => {
         resolve()
@@ -150,17 +146,68 @@ class ChromeJS {
     })
   }
 
-  async querySelector (param) {
+  async querySelector(param) {
     if (typeof param === 'number') {
       await this.sleep(param)
     }
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
       await this.sleep(50)
       let nodeObj = await this.client.Runtime.evaluate({expression: `document.querySelector('${param}')`})
       if (!nodeObj.result.subtype === 'node') {
         return await this.querySelector(param)
       }
       resolve(nodeObj)
+    })
+  }
+
+  async box(selector) {
+    return new Promise(async(resolve, reject) => {
+      let documentNode = await this.client.DOM.getDocument()
+      let clickNode = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector})
+      let boxModel = await this.client.DOM.getBoxModel({nodeId: clickNode.nodeId})
+      resolve(boxModel)
+    })
+  }
+
+  async click(selector, x, y) {
+    let boxModel = await this.box(selector)
+    let centerLeft = Math.floor((x / 2) || boxModel.model.content[0] + (boxModel.model.content[2] - boxModel.model.content[0]) / 2)
+    let centerTop = Math.floor((y / 2) || boxModel.model.content[1] + (boxModel.model.content[5] - boxModel.model.content[1]) / 2)
+    await this.client.Input.dispatchMouseEvent({type: 'mousePressed', button: 'left', clickCount: 1, x: centerLeft, y: centerTop})
+    await this.client.Input.dispatchMouseEvent({type: 'mouseReleased', button: 'left', clickCount: 1, x: centerLeft, y: centerTop})
+  }
+
+  async type (value) {
+    const characters = value.split('')
+    for (let i in characters) {
+      const c = characters[i]
+      await this.client.Input.dispatchKeyEvent({type: 'char', text: c})
+      await this.sleep(20)
+    }
+  }
+
+  async scroll (selector, y = 0, x = 0) {
+    let expr = `document.querySelector('${selector}').scrollTop += ${y}`
+    return await this.eval(expr)
+  }
+
+  async eval(expr) {
+    return new Promise(async (resolve) => {
+      resolve(this.client.Runtime.evaluate({expression: `${expr}`}))
+    })
+  }
+
+  async wait(param) {
+    if (typeof param === 'number') {
+      return this.sleep(param)
+    }
+    return new Promise(async (resolve, reject) => {
+      await this.sleep(500)
+      let evalResponse = await this.eval(`document.querySelector('${param}')`)
+      if (!evalResponse.result.subtype === 'node') {
+        return this.wait(param)
+      }
+      resolve(evalResponse)
     })
   }
 }
