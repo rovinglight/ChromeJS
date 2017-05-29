@@ -1,5 +1,5 @@
-import {ChromeLauncher} from 'lighthouse/lighthouse-cli/chrome-launcher'
-import CDP from 'chrome-remote-interface'
+const ChromeLauncher = require('lighthouse/lighthouse-cli/chrome-launcher').ChromeLauncher
+const CDP = require('chrome-remote-interface')
 
 class ChromeJS {
   constructor(options = {}) {
