@@ -5,12 +5,17 @@ class ChromeJS {
   constructor(options = {}) {
     const defaults = {
       port: 9222,
-      headless: true
+      headless: true,
+      windowSize: {}
       // waitTimeout: 30000,
       // gotoTimeout: 30000,
       // loadTimeout: 30000,
       // evaluateTimeout: 30000,
       // typeInterval: 20
+    }
+    if (options.windowSize && options.windowSize.width) {
+      let width = options.windowSize.width, height = options.windowSize.height
+      defaults.additionalChromeFlags = [`--window-size=${width},${height}`]
     }
     this.options = Object.assign(defaults, options)
     this.cdpOptions = {

@@ -13,6 +13,19 @@ describe('chromejs tests', async () => {
   afterEach(async () => {
     await chromeJs.close()
   });
+  describe('window size', function () {
+    beforeEach(async () => {
+      chromeJs = new ChromeJS({windowSize: {width: 400, height: 500}})
+      await chromeJs.start()
+      await chromeJs.goto(`http://localhost:${serverPort}/find_elements.html`)
+    });
+    it('should resize window', async () => {
+      let evalResponse = await chromeJs.eval('JSON.stringify({width: window.innerWidth, height: window.innerHeight})')
+      let size = JSON.parse(evalResponse.result.value)
+      assert.equal(400, size.width)
+      assert.equal(500, size.height)
+    });
+  });
   describe('element', function () {
     beforeEach(async () => {
       chromeJs = new ChromeJS()
