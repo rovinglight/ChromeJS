@@ -1,6 +1,7 @@
 import localServer from './fixtures/server.js'
 import ChromeJS from '../index.js'
 import assert from 'assert'
+import fs from 'fs'
 describe('chromejs tests', async () => {
   let serverPort, chromeJs
   before((done) => {
@@ -24,6 +25,20 @@ describe('chromejs tests', async () => {
       let size = JSON.parse(evalResponse.result.value)
       assert.equal(400, size.width)
       assert.equal(500, size.height)
+    });
+  });
+  describe('screenshot', function () {
+    beforeEach(async () => {
+      chromeJs = new ChromeJS()
+      await chromeJs.start()
+      await chromeJs.goto(`http://localhost:${serverPort}/find_elements.html`)
+    });
+    it('should screenshot', async () => {
+      let pngbuf = await chromeJs.screenshot()
+      let newbase64 = pngbuf.toString('base64')
+      var bitmap = fs.readFileSync(__dirname + '/fixtures/screenshot.png');
+      let base64 = new Buffer(bitmap).toString('base64');
+      assert.equal(base64, newbase64.replace('data:image/png;base64,', ''))
     });
   });
   describe('element', function () {

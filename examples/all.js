@@ -1,4 +1,4 @@
-const ChromeJS = require('ChromeJS')
+const ChromeJS = require('../')
 async function test () {
   let chromeJs = new ChromeJS({headless: false, windowSize: {width: 375, height: 677}})
   await chromeJs.start()
