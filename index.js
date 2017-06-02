@@ -1,6 +1,7 @@
 const ChromeLauncher = require('lighthouse/lighthouse-cli/chrome-launcher').ChromeLauncher
-const CDP = require('chrome-remote-interface')
-const fs = require('fs')
+const CDP            = require('chrome-remote-interface')
+const fs             = require('fs')
+const async          = require('async')
 
 class ChromeJS {
   constructor(options = {}) {
@@ -208,12 +209,13 @@ class ChromeJS {
       return this.sleep(param)
     }
     return new Promise(async (resolve, reject) => {
-      await this.sleep(500)
-      let evalResponse = await this.eval(`document.querySelector('${param}')`)
-      if (!evalResponse.result.subtype === 'node') {
-        return this.wait(param)
+      while (true) {
+        await this.sleep(10)
+        let evalResponse = await this.eval(`document.querySelector('${param}')`)
+        if (evalResponse.result.subtype === 'node') {
+          return resolve(evalResponse)
+        }
       }
-      resolve(evalResponse)
     })
   }
   async screenshot (filepath, format = 'png', quality = undefined, fromSurface = true) {

@@ -104,7 +104,7 @@ describe('chromejs tests', async () => {
       await chromeJs.click('#moreContentTrigger')
       let domElement = await chromeJs.querySelector('.moreContent')
       assert.equal(null, domElement.result.value)
-      await chromeJs.wait('#moreContentTrigger')
+      await chromeJs.wait('.moreContent')
       domElement = await chromeJs.querySelector('.moreContent')
       assert.equal('div.moreContent', domElement.result.description)
     });
