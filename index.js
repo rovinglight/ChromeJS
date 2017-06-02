@@ -205,6 +205,9 @@ class ChromeJS {
   }
 
   async wait(param) {
+    if (!param) {
+      return
+    }
     if (typeof param === 'number') {
       return this.sleep(param)
     }
