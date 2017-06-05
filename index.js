@@ -204,7 +204,7 @@ class ChromeJS {
     })
   }
 
-  async wait(param) {
+  async wait(param, timeout = 5000) {
     if (!param) {
       return
     }
@@ -212,8 +212,12 @@ class ChromeJS {
       return this.sleep(param)
     }
     return new Promise(async (resolve, reject) => {
+      const start = new Date()
       while (true) {
         await this.sleep(10)
+        if (new Date() - start >= timeout) {
+          return reject(new Error('timeout'))
+        }
         let evalResponse = await this.eval(`document.querySelector('${param}')`)
         if (evalResponse.result.subtype === 'node') {
           return resolve(evalResponse)

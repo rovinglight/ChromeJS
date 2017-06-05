@@ -108,6 +108,11 @@ describe('chromejs tests', async () => {
       domElement = await chromeJs.querySelector('.moreContent')
       assert.equal('div.moreContent', domElement.result.description)
     });
+    it('should throw timeout error after 3 sec wait for an element', async () => {
+      await chromeJs.wait('.more', 3000).catch((e) => {
+        assert.deepEqual(new Error('timeout'), e)
+      })
+    });
   });
   describe('scroll', function () {
     beforeEach(async () => {
