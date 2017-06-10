@@ -234,7 +234,7 @@ class ChromeJS {
       const {data} = await this.client.Page.captureScreenshot({format: format, quality: quality, fromSurface: fromSurface})
       let imgBuf = Buffer.from(data, 'base64')
       let img = await Jimp.read(imgBuf)
-      if (size) {
+      if (size && size.width && size.width !== img.bitmap.width) {
         img.resize(size.width, Jimp.AUTO)
       }
       img.getBuffer(Jimp.MIME_PNG, (err, buf) => {
