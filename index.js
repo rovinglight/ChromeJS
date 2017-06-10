@@ -2,6 +2,7 @@ const ChromeLauncher = require('lighthouse/lighthouse-cli/chrome-launcher').Chro
 const CDP            = require('chrome-remote-interface')
 const fs             = require('fs')
 const async          = require('async')
+const Jimp          = require('jimp')
 
 class ChromeJS {
   constructor(options = {}) {
@@ -225,16 +226,33 @@ class ChromeJS {
       }
     })
   }
-  async screenshot (filepath, format = 'png', quality = undefined, fromSurface = true) {
-    if (['png', 'jpeg'].indexOf(format) === -1) {
-      throw new Error('format is invalid.')
-    }
-    const {data} = await this.client.Page.captureScreenshot({format: format, quality: quality, fromSurface: fromSurface})
-    let imgBuf = Buffer.from(data, 'base64')
-    if (filepath) {
-      fs.writeFileSync(filepath, imgBuf)
-    }
-    return imgBuf
+  async screenshot (filepath, size, format = 'png', quality = undefined, fromSurface = true) {
+    return new Promise(async (resolve, reject) => {
+      if (['png', 'jpeg'].indexOf(format) === -1) {
+        throw new Error('format is invalid.')
+      }
+      const {data} = await this.client.Page.captureScreenshot({format: format, quality: quality, fromSurface: fromSurface})
+      let imgBuf = Buffer.from(data, 'base64')
+      let img = await Jimp.read(imgBuf)
+      if (size) {
+        img.resize(size.width, Jimp.AUTO)
+      }
+      img.getBuffer(Jimp.MIME_PNG, (err, buf) => {
+        if (err) {
+          return reject(err)
+        }
+        if (filepath) {
+          img.write(filepath, (err) => {
+            if (err) {
+              return reject(err)
+            }
+            resolve(buf)
+          })
+          return
+        }
+        resolve(buf)
+      });
+    })
   }
 }
 

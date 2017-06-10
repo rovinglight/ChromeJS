@@ -33,23 +33,31 @@ describe('chromejs tests', async () => {
       await chromeJs.start()
       await chromeJs.goto(`http://localhost:${serverPort}/find_elements.html`)
     });
-    it('should screenshot', async () => {
+    it('without filepath param', async () => {
       let filePath = './test/tmp/screenshot.png'
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath)
       }
-      let pngbuf = await chromeJs.screenshot()
-      let newbase64 = pngbuf.toString('base64')
-      var bitmap = fs.readFileSync(__dirname + '/fixtures/screenshot.png');
-      let testbase64 = new Buffer(bitmap).toString('base64');
-      assert.equal(testbase64, newbase64.replace('data:image/png;base64,', ''))
-
-      assert(!fs.existsSync(filePath))
-      await chromeJs.screenshot(filePath)
+      let Jimp = require('jimp')
+      //the size param is optional. set a width will force it scale to the corresponding size
+      let pngbuf = await chromeJs.screenshot(undefined, {width: 800})
+      let screenshot = await Jimp.read(pngbuf)
+      assert(screenshot.bitmap)
+      assert.equal(800, screenshot.bitmap.width)
+      assert.equal(600, screenshot.bitmap.height)
+    });
+    it('with filepath param', async () => {
+      let filePath = './test/tmp/screenshot.png'
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath)
+      }
+      await chromeJs.screenshot(filePath, {width: 800})
       assert(fs.existsSync(filePath))
-      bitmap = fs.readFileSync(__dirname + '/tmp/screenshot.png');
-      let filebase64 = new Buffer(bitmap).toString('base64');
-      assert.equal(filebase64, testbase64)
+      let Jimp = require('jimp')
+      let screenshot = await Jimp.read(filePath)
+      assert(screenshot.bitmap)
+      assert.equal(800, screenshot.bitmap.width)
+      assert.equal(600, screenshot.bitmap.height)
     });
   });
   describe('element', function () {
