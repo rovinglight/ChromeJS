@@ -94,9 +94,8 @@ class ChromeJS {
       })
       CDP(actualCdpOptions, async(client) => {
         this.client = client
-        const {Network, Page, Runtime, Console} = client
-        await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable()])
-
+        const {Network, Page, Runtime, Console, Animation} = client
+        await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable(), Animation.enable()])
         // focuses to first tab
         const targets = await this.client.Target.getTargets()
         const page = targets.targetInfos.filter(t => t.type === 'page').shift()
