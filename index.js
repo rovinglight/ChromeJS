@@ -171,11 +171,7 @@ class ChromeJS {
     return new Promise(async(resolve, reject) => {
       let documentNode = await this.client.DOM.getDocument()
       let clickNode = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector})
-      this.client.DOM.getBoxModel({nodeId: clickNode.nodeId}).then((boxModel) => {
-        resolve(boxModel)
-      }).catch((e) => {
-        reject(e)
-      })
+      this.client.DOM.getBoxModel({nodeId: clickNode.nodeId}).then(resolve).catch(reject)
     })
   }
 
