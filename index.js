@@ -218,9 +218,12 @@ class ChromeJS {
         if (new Date() - start >= timeout) {
           return reject(new Error('timeout'))
         }
-        let evalResponse = await this.eval(`document.querySelector('${param}')`)
+        let evalResponse = await this.eval(`document.querySelector("${param}")`)
         if (evalResponse.result.subtype === 'node') {
           return resolve(evalResponse)
+        }
+        if (evalResponse.result.subtype === 'error') {
+          return reject(evalResponse)
         }
       }
     })
