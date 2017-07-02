@@ -132,10 +132,10 @@ describe('chromejs tests', async () => {
       await chromeJs.click('#target')
       let evalResponse = await chromeJs.eval(`document.querySelector('#target').textContent`)
       assert.equal('default', evalResponse.result.value)
-      await chromeJs.scroll('body', 500)
+      await chromeJs.scroll('html', 500)
       await chromeJs.click('#target')
       evalResponse = await chromeJs.eval(`document.querySelector('#target').textContent`)
-      assert.equal('mousedown', evalResponse.result.value)
+      assert.equal(evalResponse.result.value, 'mousedown')
     });
   });
 });
