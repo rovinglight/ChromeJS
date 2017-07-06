@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "pretest": "babel index.js --source-maps --out-dir dist --ignore 'test/**/*.js'",
     "test": "mocha -t 10000 --require babel-register",
     "lint": "eslint --ext .js index.js",
     "build": "babel index.js --source-maps --out-dir dist --ignore 'test/**/*.js'"

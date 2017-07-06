@@ -1,5 +1,5 @@
 import localServer from './fixtures/server.js'
-import ChromeJS from '../index.js'
+import ChromeJS from '../dist/index.js'
 import assert from 'assert'
 import getPort from 'get-port'
 import fs from 'fs'
