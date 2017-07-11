@@ -175,6 +175,13 @@ class ChromeJS {
     })
   }
 
+  async select(selector,value){
+    selector += " option:nth-child(" + value + ")"
+    let documentNode = await this.client.DOM.getDocument()
+    let selectMenu = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector})
+    this.client.DOM.setAttributeValue({nodeId:selectMenu.nodeId,name:"selected",value:"true"})
+  }
+
   async click(selector, x, y) {
     let boxModel = await this.box(selector)
     let centerLeft = Math.floor((x / 2) || boxModel.model.content[0] + (boxModel.model.content[2] - boxModel.model.content[0]) / 2)
