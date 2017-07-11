@@ -77,6 +77,20 @@ describe('chromejs tests', async () => {
         assert(box.model)
       });
     });
+    describe('select',function(){
+      beforeEach(async () => {
+        chromeJs = new ChromeJS()
+        await chromeJs.start()
+        await chromeJs.goto(`http://localhost:${serverPort}/form.html`)
+      });
+      it('should select a option',async ()=>{
+        let evalResponse = await chromeJs.eval('document.querySelector("#singleSelect").value')
+        assert.equal('1', evalResponse.result.value)
+        await chromeJs.select("#singleSelect","2")
+        evalResponse = await chromeJs.eval('document.querySelector("#singleSelect").value')
+        assert.equal('2', evalResponse.result.value)
+      });
+    });
     describe('mouse', function () {
       beforeEach(async () => {
         chromeJs = new ChromeJS()
