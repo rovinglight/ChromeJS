@@ -175,8 +175,8 @@ class ChromeJS {
     })
   }
 
-  async select(selector,value){
-    selector += " option:nth-child(" + value + ")"
+  async select(selector,selectIndex){
+    selector += " option:nth-child(" + selectIndex + ")"
     let documentNode = await this.client.DOM.getDocument()
     let selectMenu = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector})
     this.client.DOM.setAttributeValue({nodeId:selectMenu.nodeId,name:"selected",value:"true"})
