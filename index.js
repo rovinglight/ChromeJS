@@ -1,3 +1,4 @@
+require('source-map-support').install()
 const ChromeLauncher = require('lighthouse/lighthouse-cli/chrome-launcher').ChromeLauncher
 const CDP            = require('chrome-remote-interface')
 const fs             = require('fs')
