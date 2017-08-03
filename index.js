@@ -10,7 +10,8 @@ class ChromeJS {
     const defaults = {
       port: 9222,
       headless: true,
-      windowSize: {}
+      windowSize: {},
+      additionalChromeFlags: []
       // waitTimeout: 30000,
       // gotoTimeout: 30000,
       // loadTimeout: 30000,
@@ -19,7 +20,10 @@ class ChromeJS {
     }
     if (options.windowSize && options.windowSize.width) {
       let width = options.windowSize.width, height = options.windowSize.height
-      defaults.additionalChromeFlags = [`--window-size=${width},${height}`]
+      defaults.additionalChromeFlags.push(`--window-size=${width},${height}`)
+    }
+    if (options.proxy) {
+      defaults.additionalChromeFlags.push(`--proxy-server=${options.proxy}`)
     }
     this.options = Object.assign(defaults, options)
     this.cdpOptions = {
@@ -171,7 +175,7 @@ class ChromeJS {
   async box(selector) {
     return new Promise(async(resolve, reject) => {
       let documentNode = await this.client.DOM.getDocument()
-      let clickNode = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector})
+      let clickNode = await this.client.DOM.querySelector({nodeId: documentNode.root.nodeId, selector: selector}).catch(reject)
       this.client.DOM.getBoxModel({nodeId: clickNode.nodeId}).then(resolve).catch(reject)
     })
   }
