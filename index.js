@@ -215,6 +215,12 @@ class ChromeJS {
     })
   }
 
+  async getConsole (cb) {
+    this.client.Runtime.consoleAPICalled((message) => {
+			cb(message);
+		});
+  }
+
   async wait(param, timeout = 5000) {
     if (!param) {
       return

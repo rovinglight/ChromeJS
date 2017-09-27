@@ -154,6 +154,22 @@ describe('chromejs tests', async () => {
         assert.equal(evalResponse.result.value, 'mousedown')
       })
     });
+    describe.only('console', function () {
+      beforeEach(async () => {
+        chromeJs = new ChromeJS()
+        await chromeJs.start()
+        await chromeJs.goto(`http://localhost:${serverPort}/console.html`)
+      });
+      it('should print out console content', async () => {
+        await new Promise((resolve, reject) => {
+          chromeJs.getConsole((msg) => {
+            console.log(JSON.stringify(msg, null, 2))
+            assert.equal('test2', msg.args[0].value)
+            resolve()
+          })
+        })
+      });
+    });
   });
   describe('multiple instance concurrently', function () {
     const test = async (flag) => {
